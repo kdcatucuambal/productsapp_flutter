@@ -36,9 +36,7 @@ class ProductImage extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 5))
+                color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
           ]);
 
   Widget getImage(String? picture) {

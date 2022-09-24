@@ -21,8 +21,7 @@ class RegisterScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                Text('Create an account',
-                    style: Theme.of(context).textTheme.headline4),
+                Text('Create an account', style: Theme.of(context).textTheme.headline4),
                 const SizedBox(height: 10),
                 ChangeNotifierProvider(
                   create: (_) => LoginFormProvider(),
@@ -35,8 +34,7 @@ class RegisterScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pushReplacementNamed(context, "login"),
             style: ButtonStyle(
-                overlayColor:
-                    MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
+                overlayColor: MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
                 shape: MaterialStateProperty.all(const StadiumBorder())),
             child: const Text('Already have an account?',
                 style: TextStyle(fontSize: 18, color: Colors.black87)),
@@ -59,24 +57,22 @@ class _LoginForm extends StatelessWidget {
       color: Colors.white,
       child: Form(
           key: loginFormProvider.formKey,
-          autovalidateMode: AutovalidateMode.disabled,
+          //autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
               TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: 'example@gmail.com',
-                    labelText: 'Email',
-                    prefixIcon: Icons.email),
-                onChanged: (value) => loginFormProvider.email = value,
-                validator: (value) {
-                  String pattern =
-                      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                  RegExp regExp = RegExp(pattern);
-                  return regExp.hasMatch(value ?? '') ? null : 'Invalid email';
-                },
-              ),
+                  autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecorations.authInputDecoration(
+                      hintText: 'example@gmail.com', labelText: 'Email', prefixIcon: Icons.email),
+                  onChanged: (value) => loginFormProvider.email = value,
+                  validator: (value) {
+                    String pattern =
+                        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                    RegExp regExp = RegExp(pattern);
+                    return regExp.hasMatch(value ?? '') ? null : 'Invalid email';
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction),
               const SizedBox(height: 30),
               TextFormField(
                 autocorrect: false,
@@ -89,30 +85,45 @@ class _LoginForm extends StatelessWidget {
                 ),
                 onChanged: (value) => loginFormProvider.password = value,
                 validator: (value) {
-                  if (value != null && value.length >= 6) return null;
-                  return 'Password must be at least 6 characters';
+                  if (value != null && value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+
+                  if (value != null && value != loginFormProvider.repeatPassword) {
+                    return 'Passwords do not match';
+                  }
+
+                  return null;
+                  //return 'Password must be at least 6 characters';
                 },
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
               const SizedBox(height: 30),
               TextFormField(
-                autocorrect: false,
-                obscureText: true,
-                keyboardType: TextInputType.visiblePassword,
-                decoration: InputDecorations.authInputDecoration(
-                  hintText: '********',
-                  labelText: 'Repeat password',
-                  prefixIcon: Icons.lock,
-                ),
-                onChanged: (value) => loginFormProvider.password = value,
-                validator: (value) {
-                  if (value != null && value.length >= 6) return null;
-                  return 'Password must be at least 6 characters';
-                },
-              ),
+                  autocorrect: false,
+                  obscureText: true,
+                  keyboardType: TextInputType.visiblePassword,
+                  decoration: InputDecorations.authInputDecoration(
+                    hintText: '********',
+                    labelText: 'Repeat password',
+                    prefixIcon: Icons.lock,
+                  ),
+                  onChanged: (value) => loginFormProvider.repeatPassword = value,
+                  validator: (value) {
+                    if (value != null && value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+
+                    if (value != null && value != loginFormProvider.password) {
+                      return 'Passwords do not match';
+                    }
+
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction),
               const SizedBox(height: 30),
               MaterialButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
                   color: Colors.deepPurple,
                   textColor: Colors.white,
@@ -123,24 +134,17 @@ class _LoginForm extends StatelessWidget {
                           print(loginFormProvider.email);
                           print(loginFormProvider.password);
 
-                          return;
-
                           FocusScope.of(context).unfocus();
                           if (!loginFormProvider.isValidForm()) return;
                           loginFormProvider.isLoading = true;
 
-                          final authService =
-                              Provider.of<AuthService>(context, listen: false);
+                          final authService = Provider.of<AuthService>(context, listen: false);
 
                           authService
-                              .createUser(loginFormProvider.email,
-                                  loginFormProvider.password)
+                              .createUser(loginFormProvider.email, loginFormProvider.password)
                               .then((value) => {
                                     if (value == null)
-                                      {
-                                        Navigator.pushReplacementNamed(
-                                            context, 'home')
-                                      }
+                                      {Navigator.pushReplacementNamed(context, 'home')}
                                     else
                                       {
                                         //TODO: Show error message
@@ -149,8 +153,7 @@ class _LoginForm extends StatelessWidget {
                                   });
                         },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 80, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                     child: Text(
                       loginFormProvider.isLoading ? 'Loading...' : 'Next',
                       style: const TextStyle(color: Colors.white),

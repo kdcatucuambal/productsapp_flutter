@@ -25,17 +25,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Products',
         debugShowCheckedModeBanner: false,
-        initialRoute: 'login',
+        initialRoute: 'checking',
         routes: {
           'login': (context) => const LoginScreen(),
           'register': (context) => const RegisterScreen(),
           'home': (context) => const HomeScreen(),
           'product': (context) => const ProductScreen(),
+          'checking': (context) => const CheckAuthScreen()
         },
+        scaffoldMessengerKey: NotificationsService.scaffoldMessengerKey,
         theme: ThemeData.light().copyWith(
             scaffoldBackgroundColor: const Color.fromARGB(255, 238, 232, 232),
             appBarTheme: const AppBarTheme(elevation: 0, color: Colors.blue),
-            floatingActionButtonTheme: const FloatingActionButtonThemeData(
-                backgroundColor: Colors.blue, elevation: 0)));
+            floatingActionButtonTheme:
+                const FloatingActionButtonThemeData(backgroundColor: Colors.blue, elevation: 0)));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:products_app/services/services.dart';
 import 'package:products_app/ui/input_decorations.dart';
 import 'package:products_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
@@ -31,11 +32,9 @@ class LoginScreen extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           TextButton(
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, "register"),
+            onPressed: () => Navigator.pushReplacementNamed(context, "register"),
             style: ButtonStyle(
-                overlayColor:
-                    MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
+                overlayColor: MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
                 shape: MaterialStateProperty.all(const StadiumBorder())),
             child: const Text('Create a new account',
                 style: TextStyle(fontSize: 18, color: Colors.black87)),
@@ -53,7 +52,7 @@ class _LoginForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loginFormProvider = Provider.of<LoginFormProvider>(context);
-
+    final authService = Provider.of<AuthService>(context, listen: false);
     return Container(
       color: Colors.white,
       child: Form(
@@ -65,9 +64,7 @@ class _LoginForm extends StatelessWidget {
                 autocorrect: false,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecorations.authInputDecoration(
-                    hintText: 'example@gmail.com',
-                    labelText: 'Email',
-                    prefixIcon: Icons.email),
+                    hintText: 'example@gmail.com', labelText: 'Email', prefixIcon: Icons.email),
                 onChanged: (value) => loginFormProvider.email = value,
                 validator: (value) {
                   String pattern =
@@ -94,8 +91,7 @@ class _LoginForm extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               MaterialButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
                   color: Colors.deepPurple,
                   textColor: Colors.white,
@@ -109,16 +105,20 @@ class _LoginForm extends StatelessWidget {
 
                           loginFormProvider.isLoading = true;
 
-                          Future.delayed(const Duration(seconds: 2))
-                              .then((_) => {
+                          authService
+                              .login(loginFormProvider.email, loginFormProvider.password)
+                              .then((value) => {
                                     loginFormProvider.isLoading = false,
-                                    Navigator.of(context)
-                                        .pushReplacementNamed('home'),
+                                    Navigator.of(context).pushReplacementNamed('home')
+                                  })
+                              .catchError((error) {
+                            NotificationsService.showSnackBar(error.toString());
+                          }).whenComplete(() => {
+                                    loginFormProvider.isLoading = false,
                                   });
                         },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 80, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                     child: Text(
                       loginFormProvider.isLoading ? 'Loading...' : 'Next',
                       style: const TextStyle(color: Colors.white),

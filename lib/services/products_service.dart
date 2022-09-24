@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:products_app/models/models.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsService extends ChangeNotifier {
   final String _baseUrl = 'product-hunt-ec576-default-rtdb.firebaseio.com';
+  final storage = const FlutterSecureStorage();
   final List<Product> _products = [];
   late Product selectedProduct;
   File? newPicture;
@@ -19,7 +21,8 @@ class ProductsService extends ChangeNotifier {
   Future<List<Product>> loadProducts() async {
     _isLoading = true;
     notifyListeners();
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url =
+        Uri.https(_baseUrl, 'products.json', {'auth': await storage.read(key: 'token') ?? ''});
     final response = await http.get(url);
     final Map<String, dynamic> dataMap = json.decode(response.body);
     dataMap.forEach((key, value) {
@@ -52,12 +55,12 @@ class ProductsService extends ChangeNotifier {
     }
 
     _isSaving = false;
-    print('Update product');
     notifyListeners();
   }
 
   Future<String> createProduct(Product product) async {
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url =
+        Uri.https(_baseUrl, 'products.json', {'auth': await storage.read(key: 'token') ?? ''});
     final response = await http.post(url, body: product.toJson());
     product.id = json.decode(response.body)['name'];
     _products.add(product);
@@ -65,7 +68,8 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> updateProduct(Product product) async {
-    final url = Uri.https(_baseUrl, 'products/${product.id}.json');
+    final url = Uri.https(
+        _baseUrl, 'products/${product.id}.json', {'auth': await storage.read(key: 'token') ?? ''});
     await http.put(url, body: product.toJson());
     final index = products.indexWhere((element) => element.id == product.id);
     products[index] = product;
@@ -80,8 +84,8 @@ class ProductsService extends ChangeNotifier {
 
   Future<String?> uploadImage() async {
     if (newPicture == null) return null;
-    final url = Uri.parse(
-        "https://api.cloudinary.com/v1_1/dfte0tnqy/image/upload?upload_preset=foczjw2p");
+    final url =
+        Uri.parse("https://api.cloudinary.com/v1_1/dfte0tnqy/image/upload?upload_preset=foczjw2p");
 
     final imageUploadRequest = http.MultipartRequest("POST", url);
     final file = await http.MultipartFile.fromPath("file", newPicture!.path);
